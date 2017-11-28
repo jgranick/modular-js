@@ -30,7 +30,7 @@ class Package extends Module implements IPackage {
 
     public function getCode() {
         var pre = new haxe.Template('// Package: ::packageName::
-::foreach dependencies::var ::varName:: = require(::name::);
+::foreach dependencies::var ::varName:: = require(::name::).default;
 ::end::
 ');
 
@@ -57,9 +57,9 @@ class Package extends Module implements IPackage {
         var post:haxe.Template;
 
         if (memberValues.length == 1) {
-            code = code.replace('var ${memberValues[0].name} =', 'var ${memberValues[0].name} = module.exports =');
+            code = code.replace('var ${memberValues[0].name} =', 'var ${memberValues[0].name} = module.exports.default =');
         } else {
-            post = new haxe.Template('module.exports = {
+            post = new haxe.Template('module.exports.default = {
         ::members::
     };
 ');
