@@ -1,4 +1,4 @@
-module.exports.default = function $extend(from, fields) {
+exports.extend_stub = function $extend(from, fields) {
     function Inherit() {};
     Inherit.prototype = from;
     var proto = new Inherit();
@@ -6,3 +6,4 @@ module.exports.default = function $extend(from, fields) {
     if(fields.toString !== Object.prototype.toString) proto.toString = fields.toString;
     return proto;
 };
+exports.default = exports.extend_stub;

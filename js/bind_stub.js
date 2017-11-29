@@ -5,7 +5,7 @@
 
 var $fid = 0;
 
-module.exports.default = function $bind(obj, method) {
+exports.bind_stub = function $bind(obj, method) {
     var func, mId;
 
     if( method == null ) { return null; }
@@ -26,3 +26,4 @@ module.exports.default = function $bind(obj, method) {
     }
     return func;
 };
+exports.default = exports.bind_stub;

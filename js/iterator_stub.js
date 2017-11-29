@@ -1,6 +1,6 @@
 var HxOverrides = require('./HxOverrides');
 var $bind = require('./bind_stub');
-module.exports.default = function $iterator(o) {
+exports.iterator_stub = function $iterator(o) {
     if( o instanceof Array ) {
         return function() {
             return HxOverrides.iter(o);
@@ -8,3 +8,4 @@ module.exports.default = function $iterator(o) {
     }
     return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator;
 }
+exports.default = exports.iterator_stub;

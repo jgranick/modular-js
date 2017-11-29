@@ -30,7 +30,7 @@ class Package extends Module implements IPackage {
 
     public function getCode() {
         var pre = new haxe.Template('// Package: ::packageName::
-::foreach dependencies::var ::varName:: = require(::name::).default;
+::foreach dependencies::var ::varName:: = require(::name::).::exportName::;
 ::end::
 ');
 
@@ -57,9 +57,9 @@ class Package extends Module implements IPackage {
         var post:haxe.Template;
 
         if (memberValues.length == 1) {
-            code = code.replace('var ${memberValues[0].name} =', 'var ${memberValues[0].name} = module.exports.default =');
+            code += 'exports.default = exports.${memberValues[0].name} = ${memberValues[0].name};';
         } else {
-            post = new haxe.Template('module.exports.default = {
+            post = new haxe.Template('exports = {
         ::members::
     };
 ');
@@ -86,7 +86,8 @@ class Package extends Module implements IPackage {
 					case 'extend_stub': "$extend";
 					case 'enum_stub': "$estr";
 					case k: k.replace('.', '_');
-				}
+				},
+                exportName: k.split(".").pop()
 			}],
         };
         code = pre.execute(preData) + code;
