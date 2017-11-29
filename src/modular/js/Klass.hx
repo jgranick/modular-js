@@ -44,6 +44,7 @@ class Klass extends Module implements IKlass {
 }::if (superClass != null)::)::end::;
 ::className::.__name__ = "::path::";::end::
 ::foreach statics::::className::::fieldAccessName:: = ::code::;
+::end::::if (defineProperties != "")::::defineProperties::
 ::end::::if (init)::::init::
 ::end::
 ');
@@ -71,9 +72,48 @@ class Klass extends Module implements IKlass {
             interfaces: interfaces.join(','),
             superClass: superClass,
             propertyString: [for (prop in properties) '"$prop":"$prop"'].join(','),
+            defineProperties: "",
             members: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return !m.isStatic; }),
             statics: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return m.isStatic; })
         };
+        
+        if (properties.length > 0) {
+            
+            var propNames = new Map<String, Bool> ();
+            var hasGetter = new Map<String, Bool> ();
+            var hasSetter = new Map<String, Bool> ();
+            
+            var type, propName;
+            
+            for (prop in properties) {
+                
+                type = prop.substr (0, 3);
+                propName = prop.substr (4);
+                
+                propNames.set (propName, true);
+                if (type == "set") hasSetter.set (propName, true);
+                else hasGetter.set (propName, true);
+                
+            }
+            
+            data.defineProperties = 'Object.defineProperties($name.prototype, {\n';
+            
+            for (propName in propNames.keys ()) {
+                
+                if (hasGetter[propName] && hasSetter[propName]) {
+                    data.defineProperties += '	"$propName": { get: $name.prototype.get_$propName, set: $name.prototype.set_$propName },\n';
+                } else if (hasSetter[propName]) {
+                    data.defineProperties += '	"$propName": { set: $name.prototype.set_$propName },\n';
+                } else {
+                    data.defineProperties += '	"$propName": { get: $name.prototype.get_$propName },\n';
+                }
+                
+            }
+            
+            data.defineProperties += '});\n';
+            
+        }
+        
         return t.execute(data);
     }
 
