@@ -22,6 +22,47 @@ class Klass extends Module implements IKlass {
     public function isEmpty() {
         return code.trim() == "" && !members.keys().hasNext() && init.trim() == "";
     }
+    
+    public function getTSCode() {
+        
+        // TODO: Generate proper types
+        // TODO: List getter/setter fields properly
+        // TODO: Hide @:noCompletion fields
+        
+        var t = new haxe.Template('
+export class ::className:: {
+  constructor(...args: any[]);
+::foreach members::  ::propertyAccessName::: any;
+::end::::foreach statics::  static ::propertyAccessName::: any;
+::end::
+}
+');
+        
+        function filterMember(member:IField) {
+            var f = new Field(gen);
+            f.name = member.name;
+            f.fieldAccessName = f.name.asJSFieldAccess(gen.api);
+            f.propertyAccessName = f.name.asJSPropertyAccess(gen.api);
+            f.isStatic = member.isStatic;
+            return f;
+        }
+
+        var data = {
+            overrideBase: gen.isJSExtern(name),
+            className: name,
+            path: path,
+            code: code,
+            init: if (!globalInit && init != "") init else "",
+            useHxClasses: gen.hasFeature('Type.resolveClass') || gen.hasFeature('Type.resolveEnum'),
+            dependencies: [for (key in dependencies.keys()) key],
+            interfaces: interfaces.join(','),
+            superClass: superClass,
+            members: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return !m.isStatic; }),
+            statics: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return m.isStatic; })
+        };
+        
+        return t.execute(data);
+    }
 
     public function getCode() {
         var t = new haxe.Template('

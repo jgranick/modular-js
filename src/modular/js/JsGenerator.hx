@@ -390,7 +390,6 @@ class JsGenerator
 				var filename = pack.name.replace('.', '/');
 				filePath = Path.join([outputDir, filename]);
 				FileSystem.createDirectory(Path.directory(filePath));
-				filePath += '.js';
 			} else {
 				continue;
 			}
@@ -398,7 +397,13 @@ class JsGenerator
 			print(pack.getCode());
 
 			// Put it all in a file.
-			saveContent(filePath, curBuf.toString());
+			saveContent(filePath + ".js", curBuf.toString());
+			
+			curBuf = new StringBuf();
+			
+			print(pack.getTSCode ());
+			
+			saveContent(filePath + ".d.ts", curBuf.toString());
 		}
 
 		curBuf = mainBuf;

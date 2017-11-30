@@ -22,6 +22,10 @@ class EnumModule extends Module implements IKlass {
         return code == "" && !members.keys().hasNext() && init.trim() == "";
     }
 
+    public function getTSCode() {
+        return "TODO";
+    }
+
     public function getCode() {
         var t = new haxe.Template('
 // Enum: ::path::

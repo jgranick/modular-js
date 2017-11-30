@@ -27,6 +27,25 @@ class Package extends Module implements IPackage {
             }
         }
     }
+    
+    public function getTSCode() {
+        var packageName = name.split(".").slice(0, -1).join(".");
+        var code = 'declare namespace $packageName {\n';
+        
+        for (member in members) {
+            code += member.getTSCode().indent(0);
+        }
+        
+        code += "}";
+        
+        var memberValues = [for (member in members.iterator()) member];
+        
+        if (memberValues.length == 1) {
+            code += "\nexport default " + name + ";";
+        }
+        
+        return code;
+    }
 
     public function getCode() {
         var pre = new haxe.Template('// Package: ::packageName::
