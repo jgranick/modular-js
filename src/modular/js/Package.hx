@@ -30,7 +30,7 @@ class Package extends Module implements IPackage {
     
     public function getTSCode() {
         var pre = new haxe.Template('// Package: ::packageName::
-::foreach dependencies::import ::exportName:: from ::name::;
+::foreach dependencies::import ::varName:: from ::name::;
 ::end::
 ');
         
