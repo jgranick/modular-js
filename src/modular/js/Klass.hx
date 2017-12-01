@@ -31,7 +31,7 @@ class Klass extends Module implements IKlass {
         // TODO: List getter/setter fields properly
         // TODO: Hide @:noCompletion fields
         
-        var t = new haxe.Template('export class ::className::::if (superClass != null):: extends ::superClass::::end:: {
+        var t = new haxe.Template('export class ::className::::if (superClassName != null):: extends ::superClassName::::end:: {
   constructor(...args: any[]);
 ::foreach members::  ::propertyAccessName::: any;
 ::end::::foreach statics::  static ::propertyAccessName::: any;
@@ -47,7 +47,7 @@ class Klass extends Module implements IKlass {
             f.isStatic = member.isStatic;
             return f;
         }
-
+        
         var data = {
             overrideBase: gen.isJSExtern(path),
             className: name,
@@ -58,6 +58,7 @@ class Klass extends Module implements IKlass {
             dependencies: [for (key in dependencies.keys()) key],
             interfaces: interfaces.join(','),
             superClass: superClassDot,
+            superClassName: superClassDot != null ? superClassDot.split(".").pop() : null,
             members: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return !m.isStatic; }),
             statics: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return m.isStatic; })
         };

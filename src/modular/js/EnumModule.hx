@@ -23,7 +23,32 @@ class EnumModule extends Module implements IKlass {
     }
 
     public function getTSCode() {
-        return "//TODO\nvar " + name + ": any;\n";
+        var t = new haxe.Template('
+export enum ::enumName:: {
+    ::foreach members::
+    ::fieldAccessName::,
+    ::end::
+}
+');
+        function filterMember(member:IField) {
+            var f = new EnumModuleField(gen);
+            f.name = member.name;
+            f.fieldAccessName = f.name.asJSFieldAccess(gen.api).substr(1);
+            f.code = member.getCode();
+            return f;
+        }
+
+        var data = {
+            enumName: name,
+            code: code,
+            path: path,
+            dependencies: [for (key in dependencies.keys()) key],
+            names: names,
+            constructs: constructs,
+            members: [for (member in members.iterator()) filterMember(member)]
+        };
+
+        return t.execute(data);
     }
 
     public function getCode() {
