@@ -23,7 +23,7 @@ class EnumModule extends Module implements IKlass {
     }
 
     public function getTSCode() {
-        return "TODO";
+        return "//TODO\nvar " + name + ": any;\n";
     }
 
     public function getCode() {

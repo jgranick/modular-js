@@ -29,20 +29,47 @@ class Package extends Module implements IPackage {
     }
     
     public function getTSCode() {
+        var pre = new haxe.Template('// Package: ::packageName::
+::foreach dependencies::import ::exportName:: from ::name::;
+::end::
+');
+        
+        var code = "";
+        
         var packageName = name.split(".").slice(0, -1).join(".");
-        var code = 'declare namespace $packageName {\n';
+        if (StringTools.trim (packageName) != "")
+            code += 'declare namespace $packageName {\n';
         
         for (member in members) {
             code += member.getTSCode().indent(0);
         }
         
-        code += "}";
+        if (StringTools.trim (packageName) != "")
+            code += "}";
         
         var memberValues = [for (member in members.iterator()) member];
         
         if (memberValues.length == 1) {
             code += "\nexport default " + name + ";";
         }
+        
+        var depKeys = [for (k in dependencies.keys()) k];
+        var preData = {
+            packageName: name,
+			dependencies: [for (k in depKeys) {
+				name: getDependencyName(k),
+				varName: switch k {
+					case 'bind_stub': "$bind";
+					case 'iterator_stub': "$iterator";
+					case 'extend_stub': "$extend";
+					case 'enum_stub': "$estr";
+					case k: k.replace('.', '_');
+				},
+                exportName: k.split(".").pop()
+			}],
+        };
+        code = pre.execute(preData) + code;
+
         
         return code;
     }
@@ -68,7 +95,7 @@ class Package extends Module implements IPackage {
             members: [for (member in memberValues) formatMember(member)].join(',\n\t\t'),
             singleMember: ""
         };
-
+        
         for (member in members) {
             code += member.getCode().indent(0);
         }
@@ -109,6 +136,7 @@ class Package extends Module implements IPackage {
                 exportName: k.split(".").pop()
 			}],
         };
+        
         code = pre.execute(preData) + code;
 
         return code;

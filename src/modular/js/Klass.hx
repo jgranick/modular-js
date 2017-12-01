@@ -16,7 +16,9 @@ class Klass extends Module implements IKlass {
     public var init = "";
 
     public var superClass:String = null;
+    public var superClassDot:String = null;
     public var interfaces:Array<String> = new Array();
+    public var isInterface:Bool;
     public var properties:Array<String> = new Array();
 
     public function isEmpty() {
@@ -29,8 +31,7 @@ class Klass extends Module implements IKlass {
         // TODO: List getter/setter fields properly
         // TODO: Hide @:noCompletion fields
         
-        var t = new haxe.Template('
-export class ::className:: {
+        var t = new haxe.Template('export class ::className::::if (superClass != null):: extends ::superClass::::end:: {
   constructor(...args: any[]);
 ::foreach members::  ::propertyAccessName::: any;
 ::end::::foreach statics::  static ::propertyAccessName::: any;
@@ -48,7 +49,7 @@ export class ::className:: {
         }
 
         var data = {
-            overrideBase: gen.isJSExtern(name),
+            overrideBase: gen.isJSExtern(path),
             className: name,
             path: path,
             code: code,
@@ -56,7 +57,7 @@ export class ::className:: {
             useHxClasses: gen.hasFeature('Type.resolveClass') || gen.hasFeature('Type.resolveEnum'),
             dependencies: [for (key in dependencies.keys()) key],
             interfaces: interfaces.join(','),
-            superClass: superClass,
+            superClass: superClassDot,
             members: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return !m.isStatic; }),
             statics: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return m.isStatic; })
         };
@@ -103,7 +104,7 @@ export class ::className:: {
         }
 
         var data = {
-            overrideBase: gen.isJSExtern(name),
+            overrideBase: gen.isJSExtern(path),
             className: name,
             path: path,
             code: code,
@@ -118,7 +119,7 @@ export class ::className:: {
             statics: [for (member in members.iterator()) filterMember(member)].filter(function(m) { return m.isStatic; })
         };
         
-        if (properties.length > 0) {
+        if (!isInterface && properties.length > 0) {
             
             var propNames = new Map<String, Bool> ();
             var hasGetter = new Map<String, Bool> ();
@@ -133,7 +134,7 @@ export class ::className:: {
                 
                 propNames.set (propName, true);
                 if (type == "set") hasSetter.set (propName, true);
-                else hasGetter.set (propName, true);
+                else if (type == "get") hasGetter.set (propName, true);
                 
             }
             
@@ -207,6 +208,8 @@ export class ::className:: {
                 globalInit = name == 'Std';
             }
         }
+        
+        if (c.isInterface) isInterface = true;
 
         if( c.constructor != null ) {
             code = gen.api.generateStatement(c.constructor.get().expr());
@@ -220,7 +223,8 @@ export class ::className:: {
         }
         if( c.superClass != null ) {
             gen.addDependency('extend_stub', this);
-            superClass = gen.getTypeFromPath(gen.getPath(c.superClass.t.get()));
+            superClassDot = gen.getPath(c.superClass.t.get());
+            superClass = gen.getTypeFromPath(superClassDot);
         }
         for (dep in gen.getDependencies().keys()) {
             addDependency(dep);
