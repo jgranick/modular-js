@@ -74,6 +74,7 @@ class Klass extends Module implements IKlass {
 //  ::__current__::
     ::end::
 ::end::
+var ::className:: = (function () {
 ::if (overrideBase)::::if (useHxClasses)::$$hxClasses["::path::"] = ::className::::end::
 ::else::var ::className:: = ::if (useHxClasses == true)::$$hxClasses["::path::"] = ::end::::code::;
 ::if (interfaces != "")::::className::.__interfaces__ = [::interfaces::];
@@ -89,6 +90,8 @@ class Klass extends Module implements IKlass {
 ::end::::if (defineProperties != "")::::defineProperties::
 ::end::::if (init)::::init::
 ::end::
+return ::className::;
+}());
 ');
         function filterMember(member:IField) {
             var f = new Field(gen);
