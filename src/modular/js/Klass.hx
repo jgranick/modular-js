@@ -70,6 +70,7 @@ class Klass extends Module implements IKlass {
     public function getCode() {
         var t = new haxe.Template('
 // Class: ::path::
+var __map_reserved = {};
 ::if (dependencies.length > 0)::
 // Dependencies:
     ::foreach dependencies::
@@ -149,7 +150,8 @@ return ::className::;
                 
                 if (hasGetter[propName] && hasSetter[propName]) {
                     data.defineProperties += '	"$propName": { get: $name.prototype.get_$propName, set: $name.prototype.set_$propName },\n';
-                } else if (hasSetter[propName]) {
+                } else if (false && hasSetter[propName]) {
+                    // TODO: See if there a way this can be enabled without introducing bugs
                     data.defineProperties += '	"$propName": { set: $name.prototype.set_$propName },\n';
                 } else {
                     data.defineProperties += '	"$propName": { get: $name.prototype.get_$propName },\n';

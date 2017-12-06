@@ -69,7 +69,6 @@ class Package extends Module implements IPackage {
 			}],
         };
         code = pre.execute(preData) + code;
-
         
         return code;
     }
@@ -138,6 +137,23 @@ class Package extends Module implements IPackage {
         };
         
         code = pre.execute(preData) + code;
+
+        // Hack
+        if (name == "js.Boot") {
+            code = '
+var $$global = typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this;
+var $$hxClasses = require("./../hxClasses_stub").default;
+
+var Date = $$hxClasses["Date"];
+var Int = $$hxClasses["Int"];
+var Dynamic = $$hxClasses["Dynamic"];
+var Float = $$hxClasses["Float"];
+var Bool = $$hxClasses["Bool"];
+var Class = $$hxClasses["Class"];
+var Enum = $$hxClasses["Enum"];
+var Void = $$hxClasses["Void"];
+            ' + code;
+        }
 
         return code;
     }
